@@ -6,90 +6,104 @@
   <title>Bubbeldiagram — Klimatbudget Uppsala</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
+    /* ── Huvudlayout ─────────────────────────────────────────────── */
+    .bubble-layout {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+
+    .chart-area {
+      flex: 1;
+      min-width: 0;
+    }
+
     .chart-container {
       position: relative;
       width: 100%;
-      max-width: 900px;
-      margin: 0 auto;
     }
 
     #bubble-chart {
       width: 100%;
-      background: #ffffff;
+      background: var(--color-white);
     }
 
-    .tooltip {
-      position: absolute;
-      background: var(--color-dark-navy);
-      color: var(--color-white);
-      padding: 0.6rem 0.9rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      line-height: 1.5;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.15s ease;
-      max-width: 220px;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    }
-
-    .tooltip.visible {
-      opacity: 1;
-    }
-
-    .detail-panel {
-      display: none;
+    /* ── Sidopanel (desktop) ─────────────────────────────────────── */
+    .side-panel {
+      width: 240px;
+      flex-shrink: 0;
       background: var(--color-soft-purple-bg);
       border: 1px solid var(--color-border-gray);
       border-radius: 8px;
-      padding: 1rem 1.25rem;
-      margin-top: 1rem;
-      font-size: 0.95rem;
-      color: var(--color-dark-navy);
+      padding: 1.25rem;
     }
 
-    .detail-panel.visible {
-      display: block;
+    .side-panel h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-gray);
+      margin: 0 0 0.4rem 0;
     }
 
-    .detail-panel h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.05rem;
-      color: var(--color-deep-purple);
+    .side-panel select {
+      width: 100%;
+      padding: 0.4rem;
+      border: 1px solid var(--color-border-gray);
+      border-radius: 4px;
+      font-family: var(--font-family);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      background: var(--color-white);
     }
 
-    .slider-container {
-      margin: 1.5rem 0 1rem;
-      text-align: center;
+    .side-panel hr {
+      border: none;
+      border-top: 1px solid var(--color-border-gray);
+      margin: 0.75rem 0;
     }
 
-    .year-slider {
-      width: 80%;
-      max-width: 600px;
-      accent-color: var(--color-deep-purple);
-      cursor: pointer;
+    /* ── Mobilkontroller ─────────────────────────────────────────── */
+    .mobile-controls {
+      display: none;
     }
 
-    .year-display {
-      display: block;
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--color-deep-purple);
-      margin-bottom: 0.25rem;
+    .mobile-controls select {
+      flex: 1;
+      padding: 0.4rem;
+      border: 1px solid var(--color-border-gray);
+      border-radius: 4px;
+      font-family: var(--font-family);
+      font-size: 0.8rem;
+      background: var(--color-white);
+      min-width: 0;
     }
 
-    .slider-label {
-      font-size: 0.875rem;
+    .mobile-controls .select-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .mobile-controls .select-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
       color: var(--color-text-gray);
     }
 
+    .mobile-controls .select-wrapper {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ── Legend ───────────────────────────────────────────────────── */
     .legend {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.5rem;
-      margin: 1rem 0;
+      gap: 0.4rem;
+      margin: 0;
       padding: 0;
       list-style: none;
     }
@@ -97,57 +111,144 @@
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.35rem;
       background: none;
       border: 1px solid var(--color-border-gray);
-      border-radius: 20px;
-      padding: 0.3rem 0.75rem;
+      border-radius: 16px;
+      padding: 0.2rem 0.6rem;
       cursor: pointer;
       font-family: var(--font-family);
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       color: var(--color-dark-navy);
-      transition: opacity 0.2s ease, background 0.15s ease;
+      transition: opacity 0.2s;
     }
 
-    .legend-item:hover {
-      background: var(--color-soft-purple-bg);
-    }
-
-    .legend-item.dimmed {
-      opacity: 0.3;
-    }
+    .legend-item:hover { background: var(--color-white); }
+    .legend-item.dimmed { opacity: 0.3; }
 
     .legend-dot {
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       flex-shrink: 0;
     }
 
-    .sr-only {
+    /* ── Tooltip ──────────────────────────────────────────────────── */
+    .tooltip {
       position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
+      background: var(--color-dark-navy);
+      color: var(--color-white);
+      padding: 0.6rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      max-width: 260px;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
 
+    .tooltip.visible { opacity: 1; }
+
+    /* ── Detaljpanel ─────────────────────────────────────────────── */
+    .detail-panel {
+      display: none;
+      background: var(--color-soft-purple-bg);
+      border: 1px solid var(--color-border-gray);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      color: var(--color-dark-navy);
+    }
+
+    .detail-panel.visible { display: block; }
+    .detail-panel h3 { margin: 0 0 0.5rem; color: var(--color-deep-purple); }
+
+    /* ── Play/slider ─────────────────────────────────────────────── */
+    .player-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      justify-content: center;
+    }
+
+    .play-btn {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--color-deep-purple);
+      border-radius: 50%;
+      background: var(--color-white);
+      color: var(--color-deep-purple);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .play-btn:hover { background: var(--color-soft-purple-bg); }
+    .play-btn:disabled { opacity: 0.3; cursor: default; }
+
+    .year-display {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-deep-purple);
+      min-width: 3.5rem;
+      text-align: center;
+    }
+
+    .year-slider {
+      flex: 1;
+      max-width: 400px;
+      accent-color: var(--color-deep-purple);
+      cursor: pointer;
+    }
+
+    /* ── Tillgänglighet ───────────────────────────────────────────── */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* ── Feltillstånd ─────────────────────────────────────────────── */
     .error-container {
       display: none;
       background: #fff0f0;
       border: 1px solid #ffcccc;
       border-radius: 6px;
-      padding: 1rem 1.25rem;
+      padding: 1rem;
       color: #c0392b;
       margin-top: 1rem;
     }
 
-    .error-container.visible {
-      display: block;
+    .error-container.visible { display: block; }
+
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--color-text-gray);
+    }
+
+    .empty-state.visible { display: block; }
+
+    /* ── Responsiv ────────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .bubble-layout { flex-direction: column; }
+      .side-panel { display: none; }
+      .mobile-controls { display: block; margin-bottom: 1rem; }
+      .year-slider { max-width: 100%; }
+    }
+
+    /* ── Reduced motion ───────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .tooltip { transition: none; }
     }
   </style>
 </head>
@@ -164,64 +265,72 @@
   </nav>
 
   <main class="container">
-    <h1>Utsläpp per sektor</h1>
-    <p class="subtitle">
-      Interaktivt bubbeldiagram som visar koldioxidutsläpp per sektor i Uppsala kommun.
-      Varje bubblas storlek motsvarar sektorns andel av totala utsläpp.
-    </p>
+    <h1>Klimatdata Uppsala</h1>
+    <p class="subtitle">Utforska Uppsalas klimatdata — välj dimensioner, filtrera områden och se förändringen över tid.</p>
 
-    <div class="slider-container">
-      <span class="year-display" id="year-display" aria-live="polite">2024</span>
-      <label for="year-slider" class="slider-label">Välj år</label><br>
-      <input
-        type="range"
-        id="year-slider"
-        class="year-slider"
-        min="2015"
-        max="2024"
-        value="2024"
-        step="1"
-        aria-label="Välj år för visning"
-      >
+    <div class="sr-only" id="chart-summary" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Mobilkontroller -->
+    <div class="mobile-controls" id="mobile-controls">
+      <div class="select-group">
+        <div class="select-wrapper">
+          <label for="x-axis-mobile">X-axel</label>
+          <select id="x-axis-mobile"></select>
+        </div>
+        <div class="select-wrapper">
+          <label for="y-axis-mobile">Y-axel</label>
+          <select id="y-axis-mobile"></select>
+        </div>
+        <div class="select-wrapper">
+          <label for="size-mobile">Storlek</label>
+          <select id="size-mobile"></select>
+        </div>
+      </div>
+      <div class="legend" id="legend-mobile" role="group" aria-label="Filtrera områden"></div>
     </div>
 
-    <div
-      class="legend"
-      role="group"
-      aria-label="Filtrera sektorer"
-      id="legend"
-    ></div>
+    <div class="bubble-layout">
+      <!-- Diagramområde -->
+      <div class="chart-area">
+        <div class="chart-container">
+          <svg id="bubble-chart" role="img" aria-labelledby="chart-title">
+            <title id="chart-title">Bubbeldiagram över Uppsalas klimatdata</title>
+          </svg>
+          <div class="tooltip" id="tooltip" role="tooltip" aria-hidden="true"></div>
+        </div>
 
-    <div class="chart-container">
-      <svg
-        id="bubble-chart"
-        role="img"
-        aria-labelledby="chart-title"
-      >
-        <title id="chart-title">Bubbeldiagram över CO₂-utsläpp per sektor i Uppsala kommun</title>
-      </svg>
+        <div class="empty-state" id="empty-state">
+          Ingen data tillgänglig för valda dimensioner. Prova att byta axel eller visa fler områden.
+        </div>
 
-      <div
-        class="tooltip"
-        id="tooltip"
-        role="tooltip"
-        aria-hidden="true"
-      ></div>
+        <div class="player-bar">
+          <button class="play-btn" id="play-btn" aria-label="Spela animation">▶</button>
+          <span class="year-display" id="year-display" aria-live="polite">2024</span>
+          <input type="range" id="year-slider" class="year-slider"
+                 min="2015" max="2024" value="2024" step="1"
+                 aria-label="Välj år för visning">
+        </div>
+
+        <div class="detail-panel" id="detail-panel" aria-live="polite"></div>
+      </div>
+
+      <!-- Sidopanel (desktop) -->
+      <aside class="side-panel" id="side-panel">
+        <h3><label for="x-axis-select">X-axel</label></h3>
+        <select id="x-axis-select"></select>
+
+        <h3><label for="y-axis-select">Y-axel</label></h3>
+        <select id="y-axis-select"></select>
+
+        <h3><label for="size-select">Storlek</label></h3>
+        <select id="size-select"></select>
+
+        <hr>
+
+        <h3>Områden</h3>
+        <div class="legend" id="legend-desktop" role="group" aria-label="Filtrera områden"></div>
+      </aside>
     </div>
-
-    <div
-      class="detail-panel"
-      id="detail-panel"
-      aria-live="polite"
-      aria-label="Detaljinformation om vald sektor"
-    ></div>
-
-    <div
-      class="sr-only"
-      id="chart-summary"
-      aria-live="polite"
-      aria-atomic="true"
-    ></div>
 
     <div class="error-container" id="error-container" role="alert"></div>
   </main>

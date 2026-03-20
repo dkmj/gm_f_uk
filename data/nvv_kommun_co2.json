@@ -1,0 +1,424 @@
+{
+  "sectors": [
+    {
+      "area": "Transport",
+      "year": 2015,
+      "co2e_kton": 310,
+      "share_pct": 46.3,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Transport",
+      "year": 2016,
+      "co2e_kton": 305,
+      "share_pct": 46.5,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Transport",
+      "year": 2017,
+      "co2e_kton": 298,
+      "share_pct": 46.8,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Transport",
+      "year": 2018,
+      "co2e_kton": 295,
+      "share_pct": 47.0,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Transport",
+      "year": 2019,
+      "co2e_kton": 290,
+      "share_pct": 47.3,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Transport",
+      "year": 2020,
+      "co2e_kton": 285,
+      "share_pct": 47.7,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Transport",
+      "year": 2021,
+      "co2e_kton": 260,
+      "share_pct": 46.2,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Transport",
+      "year": 2022,
+      "co2e_kton": 270,
+      "share_pct": 47.6,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Transport",
+      "year": 2023,
+      "co2e_kton": 265,
+      "share_pct": 48.0,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Transport",
+      "year": 2024,
+      "co2e_kton": 255,
+      "share_pct": 47.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2015,
+      "co2e_kton": 160,
+      "share_pct": 23.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2016,
+      "co2e_kton": 155,
+      "share_pct": 23.6,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2017,
+      "co2e_kton": 148,
+      "share_pct": 23.2,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2018,
+      "co2e_kton": 145,
+      "share_pct": 23.1,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2019,
+      "co2e_kton": 140,
+      "share_pct": 22.8,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2020,
+      "co2e_kton": 135,
+      "share_pct": 22.6,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2021,
+      "co2e_kton": 130,
+      "share_pct": 23.1,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2022,
+      "co2e_kton": 128,
+      "share_pct": 22.6,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2023,
+      "co2e_kton": 122,
+      "share_pct": 22.1,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Energi",
+      "year": 2024,
+      "co2e_kton": 118,
+      "share_pct": 22.2,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2015,
+      "co2e_kton": 80,
+      "share_pct": 11.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2016,
+      "co2e_kton": 78,
+      "share_pct": 11.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2017,
+      "co2e_kton": 76,
+      "share_pct": 11.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2018,
+      "co2e_kton": 75,
+      "share_pct": 11.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2019,
+      "co2e_kton": 73,
+      "share_pct": 11.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2020,
+      "co2e_kton": 70,
+      "share_pct": 11.7,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2021,
+      "co2e_kton": 68,
+      "share_pct": 12.1,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2022,
+      "co2e_kton": 67,
+      "share_pct": 11.8,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2023,
+      "co2e_kton": 65,
+      "share_pct": 11.8,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Bygg och anläggning",
+      "year": 2024,
+      "co2e_kton": 62,
+      "share_pct": 11.7,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2015,
+      "co2e_kton": 55,
+      "share_pct": 8.2,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2016,
+      "co2e_kton": 55,
+      "share_pct": 8.4,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2017,
+      "co2e_kton": 54,
+      "share_pct": 8.5,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2018,
+      "co2e_kton": 54,
+      "share_pct": 8.6,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2019,
+      "co2e_kton": 53,
+      "share_pct": 8.6,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2020,
+      "co2e_kton": 52,
+      "share_pct": 8.7,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2021,
+      "co2e_kton": 52,
+      "share_pct": 9.2,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2022,
+      "co2e_kton": 51,
+      "share_pct": 9.0,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2023,
+      "co2e_kton": 51,
+      "share_pct": 9.2,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Jord- och skogsbruk",
+      "year": 2024,
+      "co2e_kton": 50,
+      "share_pct": 9.4,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2015,
+      "co2e_kton": 40,
+      "share_pct": 6.0,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2016,
+      "co2e_kton": 39,
+      "share_pct": 5.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2017,
+      "co2e_kton": 38,
+      "share_pct": 6.0,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2018,
+      "co2e_kton": 37,
+      "share_pct": 5.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2019,
+      "co2e_kton": 36,
+      "share_pct": 5.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2020,
+      "co2e_kton": 35,
+      "share_pct": 5.9,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2021,
+      "co2e_kton": 34,
+      "share_pct": 6.0,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2022,
+      "co2e_kton": 33,
+      "share_pct": 5.8,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2023,
+      "co2e_kton": 32,
+      "share_pct": 5.8,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Konsumtion",
+      "year": 2024,
+      "co2e_kton": 31,
+      "share_pct": 5.8,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2015,
+      "co2e_kton": 25,
+      "share_pct": 3.7,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2016,
+      "co2e_kton": 24,
+      "share_pct": 3.7,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2017,
+      "co2e_kton": 23,
+      "share_pct": 3.6,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2018,
+      "co2e_kton": 22,
+      "share_pct": 3.5,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2019,
+      "co2e_kton": 21,
+      "share_pct": 3.4,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2020,
+      "co2e_kton": 20,
+      "share_pct": 3.4,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2021,
+      "co2e_kton": 19,
+      "share_pct": 3.4,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2022,
+      "co2e_kton": 18,
+      "share_pct": 3.2,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2023,
+      "co2e_kton": 17,
+      "share_pct": 3.1,
+      "source_id": "nvv_kommun_co2"
+    },
+    {
+      "area": "Övriga områden",
+      "year": 2024,
+      "co2e_kton": 16,
+      "share_pct": 3.0,
+      "source_id": "nvv_kommun_co2"
+    }
+  ]
+}

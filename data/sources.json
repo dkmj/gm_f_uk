@@ -9,5 +9,16 @@
     "license": "Öppen data",
     "data_file": "data/klimatkollen.json",
     "row_count": 7
+  },
+  {
+    "source_id": "nvv_kommun_co2",
+    "source_name": "Naturvårdsverket — Kommunala utsläpp",
+    "url": "https://www.naturvardsverket.se/data-och-statistik/klimat/",
+    "fetch_script": "scripts/fetch_nvv.py",
+    "last_fetched": "2026-03-20",
+    "format": "excel",
+    "license": "Öppen data",
+    "data_file": "data/nvv_kommun_co2.json",
+    "row_count": 60
   }
 ]

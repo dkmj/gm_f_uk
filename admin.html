@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datakällor — Klimatbudget Uppsala</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .source-card {
+      background: #f0eaf8;
+      border: 1px solid #c9b8e8;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .source-card h3 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+    }
+
+    .source-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.5rem 1rem;
+    }
+
+    .source-meta dt {
+      font-weight: bold;
+      color: #1a2744;
+    }
+
+    .source-meta dd {
+      margin: 0 0 0.25rem 0;
+    }
+
+    .instructions {
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .instructions code {
+      background: #f0eaf8;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .instructions pre {
+      background: #1a2744;
+      color: #ffffff;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    .btn-preview {
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.9rem;
+      background: #7c4dbd;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+
+    .btn-preview:hover {
+      background: #5e39a0;
+    }
+
+    .data-preview {
+      margin-top: 0.75rem;
+      background: #1a2744;
+      color: #e0e0e0;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      white-space: pre;
+      display: none;
+    }
+
+    .error-container {
+      color: #c0392b;
+      background: #fdecea;
+      border: 1px solid #e74c3c;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" role="navigation" aria-label="Huvudnavigation">
+    <a href="index.html" class="nav-brand">Klimatbudget Uppsala</a>
+    <button class="nav-toggle" aria-label="Öppna meny" aria-expanded="false">☰</button>
+    <ul class="nav-links">
+      <li><a href="bubble.html">Bubbeldiagram</a></li>
+      <li><a href="quiz.html">Quiz</a></li>
+      <li><a href="admin.html" aria-current="page">Datakällor</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <h1>Datakällor</h1>
+    <p class="subtitle">
+      Översikt över de datakällor som används i verktyget — när de senast hämtades och hur de uppdateras.
+    </p>
+
+    <div class="error-container" id="error-container"></div>
+
+    <div id="sources-list"></div>
+
+    <section class="instructions">
+      <h2>Uppdatera data</h2>
+      <p>
+        För att hämta ny data krävs Python-skript som körs via <code>uv</code>.
+        Kör kommandona nedan från projektets rotkatalog:
+      </p>
+      <pre>uv run scripts/fetch_klimatkollen.py
+uv run scripts/convert_excel.py
+uv run scripts/fetch_scb.py</pre>
+      <p>
+        Efter körning uppdateras JSON-filerna i mappen <code>data/</code> automatiskt.
+        Kontrollera att <code>sources.json</code> uppdateras med nytt datum under <code>last_fetched</code>.
+      </p>
+    </section>
+  </main>
+
+  <script src="js/admin.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 /**
- * bubble-chart.js — D3.js v7 bubbeldiagram för Klimatbudget Uppsala
- * Visar CO₂-utsläpp per sektor med interaktiv tidsslider och legendfilter.
+ * bubble-chart.js — Utökat D3.js v7 bubbeldiagram för Klimatbudget Uppsala
+ * Dynamiska axlar, legendfilter och play/pause-animation.
  */
 
 const SECTOR_COLORS = {
@@ -12,92 +12,162 @@ const SECTOR_COLORS = {
   'Övriga områden':      '#95A5A6',
 };
 
-const MARGIN = { top: 40, right: 40, bottom: 60, left: 70 };
+const MARGIN = { top: 20, right: 20, bottom: 50, left: 65 };
 
-// Globalt tillstånd
+// ── Globalt tillstånd ────────────────────────────────────────────────────────
+
 let allData = [];
+let metadata = {};
 let hiddenAreas = new Set();
 let currentYear = 2024;
+let xDim = 'co2e_kton';
+let yDim = 'share_pct';
+let sizeDim = 'population';
+let playInterval = null;
+let prefersReducedMotion = false;
 
 // ── Datainläsning ────────────────────────────────────────────────────────────
 
 async function loadData() {
   try {
-    const response = await fetch('data/nvv_kommun_co2.json');
-    if (!response.ok) {
-      throw new Error(`HTTP-fel vid hämtning av data: ${response.status} ${response.statusText}`);
-    }
+    const response = await fetch('data/bubble_data.json');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const json = await response.json();
-    if (!json.sectors || !Array.isArray(json.sectors)) {
-      throw new Error('Ogiltigt dataformat: fältet "sectors" saknas eller är inte en lista.');
+    allData = json.data || [];
+    metadata = json.metadata || {};
+    if (allData.length === 0) {
+      showError('Data kunde inte laddas. Kontrollera att data/bubble_data.json finns.');
+      return;
     }
-    allData = json.sectors;
+    prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     initChart();
   } catch (err) {
-    showError(`Kunde inte ladda klimatdata. ${err.message}`);
+    showError('Data kunde inte laddas. Kontrollera att data/bubble_data.json finns.');
   }
 }
 
-// ── Felvisning ───────────────────────────────────────────────────────────────
-
 function showError(message) {
-  const container = document.getElementById('error-container');
-  container.textContent = message;
-  container.classList.add('visible');
+  const el = document.getElementById('error-container');
+  el.textContent = message;
+  el.classList.add('visible');
 }
 
 // ── Initiering ───────────────────────────────────────────────────────────────
 
 function initChart() {
-  // Hämta alla unika år från data
   const years = [...new Set(allData.map(d => d.year))].sort((a, b) => a - b);
-  const minYear = years[0];
-  const maxYear = years[years.length - 1];
-  currentYear = maxYear;
+  currentYear = years[years.length - 1];
 
   const slider = document.getElementById('year-slider');
-  const yearDisplay = document.getElementById('year-display');
-
-  slider.min = minYear;
-  slider.max = maxYear;
-  slider.value = maxYear;
-  yearDisplay.textContent = maxYear;
+  slider.min = years[0];
+  slider.max = years[years.length - 1];
+  slider.value = currentYear;
+  document.getElementById('year-display').textContent = currentYear;
 
   slider.addEventListener('input', () => {
+    pauseAnimation();
     currentYear = +slider.value;
-    yearDisplay.textContent = currentYear;
+    document.getElementById('year-display').textContent = currentYear;
     updateChart();
   });
 
-  buildLegend();
+  // Play-knapp
+  const playBtn = document.getElementById('play-btn');
+  if (years.length <= 1) {
+    playBtn.disabled = true;
+    playBtn.title = 'Animering kräver data för flera år';
+  } else {
+    playBtn.addEventListener('click', togglePlay);
+  }
+
+  populateDropdowns();
+  buildLegend('legend-desktop');
+  buildLegend('legend-mobile');
   updateChart();
 
-  window.addEventListener('resize', updateChart);
+  window.addEventListener('resize', () => {
+    if (allData.length > 0) updateChart();
+  });
 }
 
-// ── Legend ───────────────────────────────────────────────────────────────────
+// ── Dropdowns ────────────────────────────────────────────────────────────────
 
-function buildLegend() {
-  const legendEl = document.getElementById('legend');
-  legendEl.innerHTML = '';
+function getAvailableDimensions() {
+  const dims = metadata.dimensions || {};
+  const numericDims = Object.keys(dims).filter(key => {
+    return allData.some(d => !hiddenAreas.has(d.area) && d[key] !== null && d[key] !== undefined);
+  });
+  return numericDims;
+}
 
-  const areas = Object.keys(SECTOR_COLORS);
+function populateDropdowns() {
+  const dims = getAvailableDimensions();
+  const dimLabels = metadata.dimensions || {};
 
-  areas.forEach(area => {
+  const desktopIds = ['x-axis-select', 'y-axis-select', 'size-select'];
+  const mobileIds = ['x-axis-mobile', 'y-axis-mobile', 'size-mobile'];
+  const defaults = [xDim, yDim, sizeDim];
+
+  [desktopIds, mobileIds].forEach(ids => {
+    ids.forEach((id, i) => {
+      const select = document.getElementById(id);
+      if (!select) return;
+      select.innerHTML = '';
+
+      // "Lika stor" som alternativ för storlek
+      if (i === 2) {
+        const opt = document.createElement('option');
+        opt.value = '_equal';
+        opt.textContent = 'Lika stor';
+        select.appendChild(opt);
+      }
+
+      dims.forEach(dim => {
+        const opt = document.createElement('option');
+        opt.value = dim;
+        opt.textContent = dimLabels[dim]?.label || dim;
+        if (dim === defaults[i]) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      select.addEventListener('change', () => {
+        pauseAnimation();
+        const val = select.value;
+        if (i === 0) xDim = val;
+        if (i === 1) yDim = val;
+        if (i === 2) sizeDim = val;
+        syncDropdowns(i, val);
+        updateChart();
+      });
+    });
+  });
+}
+
+function syncDropdowns(index, value) {
+  const ids = [
+    ['x-axis-select', 'x-axis-mobile'],
+    ['y-axis-select', 'y-axis-mobile'],
+    ['size-select', 'size-mobile'],
+  ];
+  ids[index].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+  });
+}
+
+// ── Legend ────────────────────────────────────────────────────────────────────
+
+function buildLegend(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  Object.entries(SECTOR_COLORS).forEach(([area, color]) => {
     const btn = document.createElement('button');
     btn.className = 'legend-item';
     btn.setAttribute('role', 'checkbox');
     btn.setAttribute('aria-checked', 'true');
-    btn.setAttribute('data-area', area);
-
-    const dot = document.createElement('span');
-    dot.className = 'legend-dot';
-    dot.style.background = SECTOR_COLORS[area];
-
-    const label = document.createTextNode(area);
-
-    btn.appendChild(dot);
-    btn.appendChild(label);
+    btn.innerHTML = `<span class="legend-dot" style="background:${color}"></span>${area}`;
 
     btn.addEventListener('click', () => {
       if (hiddenAreas.has(area)) {
@@ -112,198 +182,295 @@ function buildLegend() {
       updateChart();
     });
 
-    legendEl.appendChild(btn);
+    container.appendChild(btn);
   });
+}
+
+// ── Play/pause-animation ─────────────────────────────────────────────────────
+
+function togglePlay() {
+  if (playInterval) {
+    pauseAnimation();
+  } else {
+    startAnimation();
+  }
+}
+
+function startAnimation() {
+  const years = [...new Set(allData.map(d => d.year))].sort((a, b) => a - b);
+  const maxYear = years[years.length - 1];
+
+  if (currentYear >= maxYear) {
+    currentYear = years[0];
+  }
+
+  const btn = document.getElementById('play-btn');
+  btn.textContent = '⏸';
+  btn.setAttribute('aria-label', 'Pausa animation');
+
+  function step() {
+    const nextIndex = years.indexOf(currentYear) + 1;
+    if (nextIndex >= years.length) {
+      pauseAnimation();
+      return;
+    }
+    currentYear = years[nextIndex];
+    document.getElementById('year-slider').value = currentYear;
+    document.getElementById('year-display').textContent = currentYear;
+    updateChart(true);
+  }
+
+  step();
+  playInterval = setInterval(step, 1200);
+}
+
+function pauseAnimation() {
+  if (playInterval) {
+    clearInterval(playInterval);
+    playInterval = null;
+  }
+  const btn = document.getElementById('play-btn');
+  btn.textContent = '▶';
+  btn.setAttribute('aria-label', 'Spela animation');
 }
 
 // ── Diagramuppdatering ───────────────────────────────────────────────────────
 
-function updateChart() {
-  const svg = document.getElementById('bubble-chart');
-  const containerWidth = svg.parentElement.clientWidth || 600;
-  const height = Math.min(500, containerWidth * 0.6);
+function updateChart(animated = false) {
+  const chartContainer = document.querySelector('.chart-container');
+  const width = chartContainer.clientWidth || 600;
+  const height = Math.min(500, width * 0.65);
   const isMobile = window.innerWidth < 1024;
 
-  const width = containerWidth;
-  const innerWidth  = width  - MARGIN.left - MARGIN.right;
-  const innerHeight = height - MARGIN.top  - MARGIN.bottom;
+  const innerW = width - MARGIN.left - MARGIN.right;
+  const innerH = height - MARGIN.top - MARGIN.bottom;
 
-  // Filtrera på år och dolda sektorer
-  const filtered = allData.filter(
-    d => d.year === currentYear && !hiddenAreas.has(d.area)
+  // Filtrera data
+  const yearData = allData.filter(d =>
+    d.year === currentYear &&
+    !hiddenAreas.has(d.area) &&
+    d[xDim] !== null && d[xDim] !== undefined &&
+    d[yDim] !== null && d[yDim] !== undefined
   );
 
-  // Aggregera per sektor (summera om flera rader per area+år)
-  const aggregated = d3.rollups(
-    filtered,
-    rows => ({
-      area:       rows[0].area,
-      co2e_kton:  d3.sum(rows, r => r.co2e_kton),
-      share_pct:  d3.sum(rows, r => r.share_pct),
-    }),
-    d => d.area
-  ).map(([, v]) => v);
-
-  // ── Skalor ─────────────────────────────────────────────────────────────────
-
-  const areas = aggregated.map(d => d.area);
-
-  const xScale = d3.scaleBand()
-    .domain(areas)
-    .range([0, innerWidth])
-    .padding(0.3);
-
-  const maxCo2 = d3.max(aggregated, d => d.co2e_kton) || 1;
-  const yScale = d3.scaleLinear()
-    .domain([0, maxCo2 * 1.1])
-    .range([innerHeight, 0])
-    .nice();
-
-  const maxShare = d3.max(aggregated, d => d.share_pct) || 1;
-  const radiusRange = isMobile ? [8, 30] : [8, 50];
-  const rScale = d3.scaleSqrt()
-    .domain([0, maxShare])
-    .range(radiusRange);
-
-  // ── Rensa SVG (behåll title) ────────────────────────────────────────────────
-
-  const svgEl = d3.select('#bubble-chart');
-  svgEl.selectAll('*:not(title)').remove();
-  svgEl
-    .attr('width',  width)
-    .attr('height', height)
-    .attr('viewBox', `0 0 ${width} ${height}`);
-
-  const g = svgEl.append('g')
-    .attr('transform', `translate(${MARGIN.left},${MARGIN.top})`);
-
-  // ── X-axel ─────────────────────────────────────────────────────────────────
-
-  const xAxisG = g.append('g')
-    .attr('transform', `translate(0,${innerHeight})`)
-    .call(d3.axisBottom(xScale).tickSize(0));
-
-  xAxisG.select('.domain').attr('stroke', '#DDE0E3');
-
-  xAxisG.selectAll('text')
-    .attr('transform', 'rotate(-30)')
-    .attr('text-anchor', 'end')
-    .attr('dx', '-0.4em')
-    .attr('dy', '0.6em')
-    .style('font-size', isMobile ? '0.7rem' : '0.8rem')
-    .style('fill', '#4C576A');
-
-  // ── Y-axel ─────────────────────────────────────────────────────────────────
-
-  const yAxisG = g.append('g')
-    .call(
-      d3.axisLeft(yScale)
-        .ticks(5)
-        .tickFormat(d => `${d} kton`)
-    );
-
-  yAxisG.select('.domain').attr('stroke', '#DDE0E3');
-  yAxisG.selectAll('text').style('fill', '#4C576A').style('font-size', '0.8rem');
-  yAxisG.selectAll('.tick line').attr('stroke', '#DDE0E3');
-
-  // Y-axel etikett
-  g.append('text')
-    .attr('transform', 'rotate(-90)')
-    .attr('x', -innerHeight / 2)
-    .attr('y', -MARGIN.left + 16)
-    .attr('text-anchor', 'middle')
-    .style('font-size', '0.8rem')
-    .style('fill', '#4C576A')
-    .text('CO₂-ekvivalenter (kton)');
-
-  // ── Bubblor ────────────────────────────────────────────────────────────────
-
-  const tooltip   = document.getElementById('tooltip');
-  const detailPanel = document.getElementById('detail-panel');
-
-  function showDetail(d) {
-    detailPanel.innerHTML = `
-      <h3>${d.area}</h3>
-      <p><strong>Utsläpp:</strong> ${d.co2e_kton.toLocaleString('sv-SE')} kton CO₂e</p>
-      <p><strong>Andel av totalt:</strong> ${d.share_pct.toFixed(1)} %</p>
-      <p><strong>År:</strong> ${currentYear}</p>
-    `;
-    detailPanel.classList.add('visible');
+  // Visa/dölj tomma tillstånd
+  const emptyState = document.getElementById('empty-state');
+  if (yearData.length === 0) {
+    emptyState.classList.add('visible');
+  } else {
+    emptyState.classList.remove('visible');
   }
 
+  // Skalor — domän baserad på ALL data (stabila skalor)
+  const allVisible = allData.filter(d => d[xDim] !== null && d[yDim] !== null);
+
+  const xExtent = d3.extent(allVisible, d => d[xDim]);
+  const yExtent = d3.extent(allVisible, d => d[yDim]);
+
+  const xScale = d3.scaleLinear()
+    .domain([0, (xExtent[1] || 1) * 1.1])
+    .range([0, innerW])
+    .nice();
+
+  const yScale = d3.scaleLinear()
+    .domain([0, (yExtent[1] || 1) * 1.1])
+    .range([innerH, 0])
+    .nice();
+
+  let rScale;
+  if (sizeDim === '_equal') {
+    rScale = () => isMobile ? 18 : 28;
+  } else {
+    const sizeValues = allData.filter(d => d[sizeDim] !== null).map(d => d[sizeDim]);
+    const maxSize = d3.max(sizeValues) || 1;
+    rScale = d3.scaleSqrt()
+      .domain([0, maxSize])
+      .range([6, isMobile ? 28 : 45]);
+  }
+
+  // SVG
+  const svgEl = d3.select('#bubble-chart');
+  const transitionDuration = (animated && !prefersReducedMotion) ? 800 : 0;
+
+  // Första rendering — rensa allt
+  if (svgEl.select('g.chart-g').empty()) {
+    svgEl.selectAll('*:not(title)').remove();
+    svgEl
+      .attr('width', width)
+      .attr('height', height)
+      .attr('viewBox', `0 0 ${width} ${height}`);
+    svgEl.append('g').attr('class', 'chart-g')
+      .attr('transform', `translate(${MARGIN.left},${MARGIN.top})`);
+    svgEl.select('g.chart-g').append('g').attr('class', 'x-axis-g')
+      .attr('transform', `translate(0,${innerH})`);
+    svgEl.select('g.chart-g').append('g').attr('class', 'y-axis-g');
+    svgEl.select('g.chart-g').append('text').attr('class', 'x-label');
+    svgEl.select('g.chart-g').append('text').attr('class', 'y-label');
+  } else {
+    svgEl.attr('width', width).attr('height', height).attr('viewBox', `0 0 ${width} ${height}`);
+  }
+
+  const g = svgEl.select('g.chart-g');
+  const dimLabels = metadata.dimensions || {};
+
+  // Axlar
+  const xAxisG = g.select('.x-axis-g');
+  xAxisG.transition().duration(transitionDuration)
+    .call(d3.axisBottom(xScale).ticks(6));
+  xAxisG.select('.domain').attr('stroke', '#DDE0E3');
+  xAxisG.selectAll('text').style('fill', '#4C576A').style('font-size', '0.8rem');
+
+  const yAxisG = g.select('.y-axis-g');
+  yAxisG.transition().duration(transitionDuration)
+    .call(d3.axisLeft(yScale).ticks(6));
+  yAxisG.select('.domain').attr('stroke', '#DDE0E3');
+  yAxisG.selectAll('text').style('fill', '#4C576A').style('font-size', '0.8rem');
+
+  // Axeletiketter
+  g.select('.x-label')
+    .attr('x', innerW / 2)
+    .attr('y', innerH + 40)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '0.85rem')
+    .style('fill', '#4C576A')
+    .text(dimLabels[xDim]?.label || xDim);
+
+  g.select('.y-label')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -innerH / 2)
+    .attr('y', -MARGIN.left + 16)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '0.85rem')
+    .style('fill', '#4C576A')
+    .text(dimLabels[yDim]?.label || yDim);
+
+  // Bubblor (join-pattern med transition)
+  const tooltip = document.getElementById('tooltip');
+  const detailPanel = document.getElementById('detail-panel');
+
   const circles = g.selectAll('circle.bubble')
-    .data(aggregated, d => d.area)
-    .join('circle')
+    .data(yearData, d => d.area);
+
+  circles.exit()
+    .transition().duration(transitionDuration)
+    .attr('r', 0)
+    .remove();
+
+  const enter = circles.enter()
+    .append('circle')
     .attr('class', 'bubble')
-    .attr('cx', d => xScale(d.area) + xScale.bandwidth() / 2)
-    .attr('cy', d => yScale(d.co2e_kton))
-    .attr('r',  d => rScale(d.share_pct))
+    .attr('cx', d => xScale(d[xDim]))
+    .attr('cy', d => yScale(d[yDim]))
+    .attr('r', 0)
     .attr('fill', d => SECTOR_COLORS[d.area] || '#95A5A6')
     .attr('fill-opacity', 0.75)
     .attr('stroke', d => SECTOR_COLORS[d.area] || '#95A5A6')
     .attr('stroke-width', 1.5)
     .attr('tabindex', 0)
     .attr('role', 'button')
-    .attr('aria-label', d =>
-      `${d.area}: ${d.co2e_kton.toLocaleString('sv-SE')} kton CO₂e, ${d.share_pct.toFixed(1)} % av totalt, år ${currentYear}`
-    )
     .style('cursor', 'pointer');
 
-  // Desktop: hover-tooltip
-  circles
+  const merged = enter.merge(circles);
+
+  merged
+    .attr('aria-label', d => buildAriaLabel(d))
+    .transition().duration(transitionDuration)
+    .attr('cx', d => xScale(d[xDim]))
+    .attr('cy', d => yScale(d[yDim]))
+    .attr('r', d => {
+      if (sizeDim === '_equal') return rScale();
+      return d[sizeDim] !== null ? rScale(d[sizeDim]) : rScale(0);
+    });
+
+  // Event-handlers (på ej-övergångande element)
+  merged
     .on('mouseenter', function(event, d) {
       if (window.innerWidth >= 1024) {
-        tooltip.innerHTML = `
-          <strong>${d.area}</strong><br>
-          ${d.co2e_kton.toLocaleString('sv-SE')} kton CO₂e<br>
-          ${d.share_pct.toFixed(1)} % av totalt
-        `;
-        tooltip.setAttribute('aria-hidden', 'false');
+        tooltip.innerHTML = buildTooltipHTML(d);
         tooltip.classList.add('visible');
+        tooltip.setAttribute('aria-hidden', 'false');
       }
     })
     .on('mousemove', function(event) {
       if (window.innerWidth >= 1024) {
-        const container = document.querySelector('.chart-container');
-        const rect = container.getBoundingClientRect();
+        const rect = chartContainer.getBoundingClientRect();
         let left = event.clientX - rect.left + 12;
-        let top  = event.clientY - rect.top  - 10;
-        // Håll tooltip inom containern
-        if (left + 230 > container.clientWidth) left -= 240;
+        let top = event.clientY - rect.top - 10;
+        if (left + 260 > chartContainer.clientWidth) left -= 280;
         tooltip.style.left = `${left}px`;
-        tooltip.style.top  = `${top}px`;
+        tooltip.style.top = `${top}px`;
       }
     })
     .on('mouseleave', function() {
       tooltip.classList.remove('visible');
       tooltip.setAttribute('aria-hidden', 'true');
+    })
+    .on('click', function(event, d) {
+      showDetailPanel(d);
+    })
+    .on('keydown', function(event, d) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        showDetailPanel(d);
+      }
     });
 
-  // Mobil: klick visar detaljpanel
-  circles.on('click', function(event, d) {
-    if (window.innerWidth < 1024) {
-      showDetail(d);
+  // Tillgänglig sammanfattning
+  updateSummary(yearData);
+}
+
+// ── Hjälpfunktioner ──────────────────────────────────────────────────────────
+
+function buildTooltipHTML(d) {
+  const dims = metadata.dimensions || {};
+  let html = `<strong>${d.area}</strong> (${d.year})<br>`;
+
+  Object.entries(dims).forEach(([key, info]) => {
+    if (d[key] !== null && d[key] !== undefined) {
+      const val = typeof d[key] === 'number'
+        ? d[key].toLocaleString('sv-SE', { maximumFractionDigits: 1 })
+        : d[key];
+      html += `${info.label}: ${val}<br>`;
     }
   });
 
-  // Tangentbord: Enter/Mellanslag triggar detaljpanel
-  circles.on('keydown', function(event, d) {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      showDetail(d);
+  return html;
+}
+
+function buildAriaLabel(d) {
+  const dims = metadata.dimensions || {};
+  const parts = [`${d.area}, ${d.year}`];
+  Object.entries(dims).forEach(([key, info]) => {
+    if (d[key] !== null && d[key] !== undefined) {
+      parts.push(`${info.label}: ${d[key]}`);
+    }
+  });
+  return parts.join(', ');
+}
+
+function showDetailPanel(d) {
+  const panel = document.getElementById('detail-panel');
+  const dims = metadata.dimensions || {};
+  let html = `<h3>${d.area} (${d.year})</h3>`;
+
+  Object.entries(dims).forEach(([key, info]) => {
+    if (d[key] !== null && d[key] !== undefined) {
+      const val = typeof d[key] === 'number'
+        ? d[key].toLocaleString('sv-SE', { maximumFractionDigits: 1 })
+        : d[key];
+      html += `<p><strong>${info.label}:</strong> ${val} ${info.unit}</p>`;
     }
   });
 
-  // ── Tillgänglig sammanfattning ─────────────────────────────────────────────
+  panel.innerHTML = html;
+  panel.classList.add('visible');
+}
 
-  const totalCo2 = d3.sum(aggregated, d => d.co2e_kton);
-  const summaryParts = aggregated
-    .sort((a, b) => b.co2e_kton - a.co2e_kton)
-    .map(d => `${d.area} ${d.co2e_kton.toLocaleString('sv-SE')} kton`)
-    .join(', ');
-
+function updateSummary(data) {
+  const sorted = [...data].sort((a, b) => (b[yDim] || 0) - (a[yDim] || 0));
+  const parts = sorted.map(d => `${d.area}: ${d[yDim]?.toLocaleString('sv-SE') || '–'}`);
   document.getElementById('chart-summary').textContent =
-    `Bubbeldiagram för ${currentYear}. Totalt ${totalCo2.toLocaleString('sv-SE')} kton CO₂e. Sektorer (störst till minst): ${summaryParts}.`;
+    `Bubbeldiagram ${currentYear}. ${parts.join(', ')}.`;
 }
 
 // ── Starta ───────────────────────────────────────────────────────────────────

@@ -126,10 +126,14 @@ Dropdowns visas kompakt i fullbredd ovanför diagrammet. Legendfilter visas som 
 
 ### 3.3 Axelväljare
 
+**Skaltyp:** Alla axlar använder `d3.scaleLinear()` — detta är en förändring från MVP:n som använde `d3.scaleBand()` med områdesnamn på X-axeln. Den nya versionen har numeriska värden på båda axlarna, precis som Gapminder.
+
 Tre `<select>`-element:
 - **X-axel** — alla numeriska dimensioner som har data
 - **Y-axel** — alla numeriska dimensioner som har data
 - **Storlek** — alla numeriska dimensioner + "Lika stor" (default)
+
+**Dublettval:** Samma dimension får väljas på flera axlar (t.ex. X och Y båda satta till co2e_kton). Diagrammet visar då en diagonal linje — inte användbart men inte heller ett fel. Ingen validering behövs.
 
 Standardvärden:
 - X: co2e_kton
@@ -138,16 +142,17 @@ Standardvärden:
 
 När användaren byter dimension:
 1. Axeletikett uppdateras
-2. Skalor räknas om (domain baserat på all data, inte bara valt år)
+2. Skalor räknas om (domain baserat på all data över alla år och alla områden, inklusive dolda — detta håller skalorna stabila)
 3. Bubblor animeras till nya positioner med D3 transition (500ms)
+4. Bubblor vars valda dimension är `null` döljs tillfälligt
 
 Dimensioner med `null` för alla synliga områden filtreras bort ur dropdown-listan.
 
 ### 3.4 Play/pause-animation
 
 - **Knapp:** ▶ (play) / ⏸ (pause) placerad till vänster om slidern
-- **Hastighet:** ~1 sekund per år
-- **Transitions:** D3 `.transition().duration(800)` för smooth rörelse
+- **Hastighet:** 1200ms per steg (800ms transition + 400ms paus)
+- **Transitions:** D3 `.transition().duration(800)` för smooth rörelse, följt av 400ms statisk visning innan nästa steg
 - **Beteende:**
   - Play: Stegar framåt från aktuellt år till sista året, sedan stoppar
   - Pause: Stoppar på aktuellt år
@@ -172,6 +177,30 @@ Fordon: 98 500
 Elbilar: 8.2%
 Kollektivtrafik: 142 resor/inv
 ```
+
+### 3.6 Feltillstånd
+
+- **Data kan inte laddas:** Visar "Data kunde inte laddas. Kontrollera att data/bubble_data.json finns." (Ersätter MVP:ns referens till nvv_kommun_co2.json.)
+- **Inga synliga bubblor:** Om alla synliga områdens värden är `null` för valda axlar: "Ingen data tillgänglig för valda dimensioner. Prova att byta axel eller visa fler områden."
+- **Bara ett år i data:** Play-knappen inaktiveras (disabled) med tooltip "Animering kräver data för flera år."
+
+### 3.7 Datakällsprovenienshantering
+
+Den nya `bubble_data.json` innehåller ett `sources`-fält i metadata som listar vilka källfiler som ingick:
+
+```json
+"metadata": {
+  "generated": "2026-03-20",
+  "sources": ["nvv_kommun_co2.json", "scb_dimensions.json"],
+  "dimensions": { ... }
+}
+```
+
+Detaljerad proveniensinfo finns kvar i `data/sources.json` — admin-vyn refererar dit.
+
+### 3.8 Bakåtkompatibilitet
+
+Den nya `bubble-chart.js` läser **enbart** `data/bubble_data.json`. Den gamla filen `data/nvv_kommun_co2.json` behålls (används av merge-skriptet som input) men bubbeldiagrammet refererar inte längre till den direkt.
 
 ## 4. Datapipeline
 
@@ -198,9 +227,16 @@ Exakta tabell-ID:n verifieras vid implementation genom SCB:s API-navigering.
 
 ### 4.3 Beräknade dimensioner
 
-- `co2e_per_capita` = `co2e_kton * 1000 / population` (beräknas i merge-skriptet)
+- `co2e_per_capita` = totala kommunala utsläpp (summa co2e_kton alla sektorer) × 1000 / population. Beräknas per år i merge-skriptet. Samma värde sätts på alla områden (kommungemensam dimension).
 
-### 4.4 Befintliga skript
+### 4.4 Årsintervall och saknad data
+
+Alla dimensioner ska hämtas för åren **2015–2024** (samma som NVV-data). Om en SCB-dimension saknar data för vissa år:
+- Merge-skriptet sätter `null` för de åren
+- Bubblor med `null`-värden på vald axel döljs för det året
+- Inga interpoleringar eller uppskattningar görs
+
+### 4.5 Befintliga skript
 
 `fetch_nvv.py`, `fetch_scb.py`, `fetch_klimatkollen.py` och `convert_excel.py` ändras inte. Merge-skriptet läser deras output-filer.
 
@@ -236,3 +272,4 @@ Samma WCAG 2.1 AA-krav som MVP, plus:
 - Play-knapp har uppdaterande `aria-label`
 - Animationen respekterar `prefers-reduced-motion` (hoppar direkt istället för att animera)
 - Sidopanelens checkboxar har korrekta `aria-checked`-attribut
+- Tangentbordsgenvägar: Mellanslag på play-knappen togglar play/pause, piltangenter vänster/höger stegar ett år bakåt/framåt när slidern har fokus

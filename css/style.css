@@ -1,0 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap');
+
+:root {
+  /* Uppsala kommun UI-färger */
+  --color-primary-yellow: #FEDD00;
+  --color-dark-navy: #202E45;
+  --color-deep-purple: #262262;
+  --color-link-blue: #212AA1;
+  --color-light-lavender: #D4D1ED;
+  --color-soft-purple-bg: #F4F3FF;
+  --color-text-gray: #4C576A;
+  --color-border-gray: #DDE0E3;
+  --color-white: #FFFFFF;
+
+  /* Sektorfärger — separata från UI */
+  --sector-transport: #2B7CE9;
+  --sector-energi: #F5A623;
+  --sector-bygg: #8B6D5C;
+  --sector-jordskog: #2D8A4E;
+  --sector-konsumtion: #9B59B6;
+  --sector-ovriga: #95A5A6;
+
+  --font-family: 'Source Sans Pro', sans-serif, arial;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--color-dark-navy);
+  background-color: var(--color-white);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Navigation */
+.nav {
+  background-color: var(--color-dark-navy);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.nav-brand {
+  color: var(--color-primary-yellow);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: var(--color-white);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-links a:hover {
+  color: var(--color-primary-yellow);
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-white);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Huvudinnehåll */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1, h2, h3 {
+  color: var(--color-deep-purple);
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--color-text-gray);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+/* Kort (landningssida) */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.card {
+  background-color: var(--color-soft-purple-bg);
+  border: 1px solid var(--color-border-gray);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+/* Feltillstånd */
+.error-message {
+  background-color: #FFF3CD;
+  border: 1px solid #FEDD00;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-dark-navy);
+}
+
+/* Fokusindikator (tillgänglighet) */
+:focus-visible {
+  outline: 3px solid var(--color-primary-yellow);
+  outline-offset: 2px;
+}
+
+/* Responsiv */
+@media (max-width: 1024px) {
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background-color: var(--color-dark-navy);
+    padding: 1rem 2rem;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-toggle {
+    display: block;
+  }
+
+  .container {
+    padding: 1rem;
+  }
+}

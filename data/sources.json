@@ -20,5 +20,16 @@
     "license": "Öppen data",
     "data_file": "data/nvv_kommun_co2.json",
     "row_count": 60
+  },
+  {
+    "source_id": "scb_dimensions",
+    "source_name": "SCB — Kommunala dimensioner",
+    "url": "https://api.scb.se/OV0104/v1/doris/sv/ssd",
+    "fetch_script": "scripts/fetch_scb_dimensions.py",
+    "last_fetched": "2026-03-20",
+    "format": "api",
+    "license": "Öppen data",
+    "data_file": "data/scb_dimensions.json",
+    "row_count": 80
   }
 ]

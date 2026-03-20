@@ -1,0 +1,44 @@
+{
+  "questions": [
+    {
+      "question": "Hur stor andel av Uppsalas territoriella utsläpp kommer från transportsektorn?",
+      "options": ["Cirka 15%", "Cirka 30%", "Cirka 45%", "Cirka 60%"],
+      "correct": 2,
+      "explanation": "Transporter står för ungefär 40–45% av de territoriella utsläppen i Uppsala kommun, vilket gör det till det största utsläppsområdet.",
+      "source": "Naturvårdsverket, kommunala utsläpp",
+      "area": "Transport"
+    },
+    {
+      "question": "Med hur många procent per år behöver Uppsalas utsläpp minska för att nå Parisavtalets mål?",
+      "options": ["5–8%", "10–14%", "18–22%", "25–30%"],
+      "correct": 2,
+      "explanation": "Enligt Uppsalas klimatbudget behöver växthusgasutsläppen minska med 18–22% per år inom kommunens geografiska område.",
+      "source": "Mål och budget 2026, Uppsala kommun",
+      "area": "Övriga områden"
+    },
+    {
+      "question": "När ska Uppsala vara klimatneutralt enligt kommunens mål?",
+      "options": ["2025", "2030", "2040", "2050"],
+      "correct": 1,
+      "explanation": "Uppsala kommun har målet att vara klimatneutralt år 2030, klimatanpassat senast 2040 och klimatpositivt senast 2050.",
+      "source": "Mål och budget 2026, Uppsala kommun",
+      "area": "Övriga områden"
+    },
+    {
+      "question": "Vilket av dessa områden har störst utsläpp i Uppsala?",
+      "options": ["Energi", "Bygg och anläggning", "Transport", "Jordbruk"],
+      "correct": 2,
+      "explanation": "Transportsektorn är den största utsläppskällan i Uppsala kommun, följt av energisektorn.",
+      "source": "Naturvårdsverket, kommunala utsläpp",
+      "area": "Transport"
+    },
+    {
+      "question": "Ungefär hur stora är Uppsalas totala territoriella utsläpp per år?",
+      "options": ["Cirka 200 kton CO₂e", "Cirka 450 kton CO₂e", "Cirka 650 kton CO₂e", "Cirka 900 kton CO₂e"],
+      "correct": 2,
+      "explanation": "Uppsalas totala territoriella utsläpp ligger på ungefär 550–700 kton CO₂e per år, beroende på år och beräkningsmetod.",
+      "source": "Naturvårdsverket / Klimatkollen",
+      "area": "Övriga områden"
+    }
+  ]
+}

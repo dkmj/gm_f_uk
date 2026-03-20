@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz — Klimatbudget Uppsala</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .quiz-container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .quiz-container h1 {
+      color: var(--color-deep-purple);
+      margin-bottom: 0.25rem;
+    }
+
+    .quiz-container .subtitle {
+      color: var(--color-text-gray);
+      margin-bottom: 2rem;
+    }
+
+    /* Förloppsindikator */
+    .progress {
+      color: var(--color-text-gray);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background-color: var(--color-border-gray);
+      border-radius: 3px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: var(--color-deep-purple);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* Frågetext */
+    .question-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-dark-navy);
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+
+    /* Svarsalternativ */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .option-btn {
+      width: 100%;
+      padding: 0.875rem 1.25rem;
+      background-color: var(--color-soft-purple-bg);
+      border: 2px solid var(--color-light-lavender);
+      border-radius: 8px;
+      font-family: var(--font-family);
+      font-size: 1rem;
+      color: var(--color-dark-navy);
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: var(--color-light-lavender);
+      border-color: var(--color-deep-purple);
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .option-btn.correct {
+      background-color: #D4EDDA;
+      border-color: #28A745;
+      color: #155724;
+    }
+
+    .option-btn.wrong {
+      background-color: #F8D7DA;
+      border-color: #DC3545;
+      color: #721C24;
+    }
+
+    /* Återkoppling */
+    .feedback {
+      display: none;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .feedback.visible {
+      display: block;
+    }
+
+    .feedback.correct {
+      background-color: #D4EDDA;
+      border-left: 4px solid #28A745;
+      color: #155724;
+    }
+
+    .feedback.wrong {
+      background-color: #F8D7DA;
+      border-left: 4px solid #DC3545;
+      color: #721C24;
+    }
+
+    .feedback-source {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--color-text-gray);
+    }
+
+    /* Nästa-knapp */
+    .next-btn {
+      display: none;
+      padding: 0.75rem 1.5rem;
+      background-color: var(--color-deep-purple);
+      color: var(--color-white);
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-family);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .next-btn.visible {
+      display: inline-block;
+    }
+
+    .next-btn:hover {
+      opacity: 0.88;
+    }
+
+    /* Resultatvy */
+    .results {
+      text-align: center;
+      padding: 2rem 0;
+    }
+
+    .results h2 {
+      color: var(--color-dark-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    .score {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--color-deep-purple);
+      margin: 0.5rem 0;
+    }
+
+    .score-context {
+      color: var(--color-text-gray);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .results-links {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .restart-btn {
+      padding: 0.75rem 1.75rem;
+      background-color: var(--color-primary-yellow);
+      color: var(--color-dark-navy);
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-family);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .restart-btn:hover {
+      opacity: 0.88;
+    }
+
+    .bubble-link {
+      color: var(--color-link-blue);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    /* Felvisning */
+    .error-container {
+      padding: 1.5rem;
+      background-color: #F8D7DA;
+      border-left: 4px solid #DC3545;
+      border-radius: 8px;
+      color: #721C24;
+      display: none;
+    }
+
+    .error-container.visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" role="navigation" aria-label="Huvudnavigation">
+    <a href="index.html" class="nav-brand">Klimatbudget Uppsala</a>
+    <button class="nav-toggle" aria-label="Öppna meny" aria-expanded="false">☰</button>
+    <ul class="nav-links">
+      <li><a href="bubble.html">Bubbeldiagram</a></li>
+      <li><a href="quiz.html" aria-current="page">Quiz</a></li>
+      <li><a href="admin.html">Datakällor</a></li>
+    </ul>
+  </nav>
+
+  <div class="quiz-container">
+    <h1>Klimatquiz</h1>
+    <p class="subtitle">Testa din kunskap om Uppsalas klimatutsläpp och klimatmål.</p>
+
+    <div class="error-container" id="error-container" role="alert"></div>
+
+    <div class="quiz-content" id="quiz-content"></div>
+  </div>
+
+  <script src="js/nav.js"></script>
+  <script src="js/quiz.js"></script>
+</body>
+</html>

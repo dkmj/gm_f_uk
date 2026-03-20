@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubbeldiagram — Klimatbudget Uppsala</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    #bubble-chart {
+      width: 100%;
+      background: #ffffff;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: var(--color-dark-navy);
+      color: var(--color-white);
+      padding: 0.6rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      max-width: 220px;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+
+    .tooltip.visible {
+      opacity: 1;
+    }
+
+    .detail-panel {
+      display: none;
+      background: var(--color-soft-purple-bg);
+      border: 1px solid var(--color-border-gray);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: var(--color-dark-navy);
+    }
+
+    .detail-panel.visible {
+      display: block;
+    }
+
+    .detail-panel h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.05rem;
+      color: var(--color-deep-purple);
+    }
+
+    .slider-container {
+      margin: 1.5rem 0 1rem;
+      text-align: center;
+    }
+
+    .year-slider {
+      width: 80%;
+      max-width: 600px;
+      accent-color: var(--color-deep-purple);
+      cursor: pointer;
+    }
+
+    .year-display {
+      display: block;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-deep-purple);
+      margin-bottom: 0.25rem;
+    }
+
+    .slider-label {
+      font-size: 0.875rem;
+      color: var(--color-text-gray);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: none;
+      border: 1px solid var(--color-border-gray);
+      border-radius: 20px;
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.875rem;
+      color: var(--color-dark-navy);
+      transition: opacity 0.2s ease, background 0.15s ease;
+    }
+
+    .legend-item:hover {
+      background: var(--color-soft-purple-bg);
+    }
+
+    .legend-item.dimmed {
+      opacity: 0.3;
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .error-container {
+      display: none;
+      background: #fff0f0;
+      border: 1px solid #ffcccc;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      color: #c0392b;
+      margin-top: 1rem;
+    }
+
+    .error-container.visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" role="navigation" aria-label="Huvudnavigation">
+    <a href="index.html" class="nav-brand">Klimatbudget Uppsala</a>
+    <button class="nav-toggle" aria-label="Öppna meny" aria-expanded="false">☰</button>
+    <ul class="nav-links">
+      <li><a href="index.html">Start</a></li>
+      <li><a href="bubble.html" aria-current="page">Bubbeldiagram</a></li>
+      <li><a href="quiz.html">Quiz</a></li>
+      <li><a href="admin.html">Datakällor</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <h1>Utsläpp per sektor</h1>
+    <p class="subtitle">
+      Interaktivt bubbeldiagram som visar koldioxidutsläpp per sektor i Uppsala kommun.
+      Varje bubblas storlek motsvarar sektorns andel av totala utsläpp.
+    </p>
+
+    <div class="slider-container">
+      <span class="year-display" id="year-display" aria-live="polite">2024</span>
+      <label for="year-slider" class="slider-label">Välj år</label><br>
+      <input
+        type="range"
+        id="year-slider"
+        class="year-slider"
+        min="2015"
+        max="2024"
+        value="2024"
+        step="1"
+        aria-label="Välj år för visning"
+      >
+    </div>
+
+    <div
+      class="legend"
+      role="group"
+      aria-label="Filtrera sektorer"
+      id="legend"
+    ></div>
+
+    <div class="chart-container">
+      <svg
+        id="bubble-chart"
+        role="img"
+        aria-labelledby="chart-title"
+      >
+        <title id="chart-title">Bubbeldiagram över CO₂-utsläpp per sektor i Uppsala kommun</title>
+      </svg>
+
+      <div
+        class="tooltip"
+        id="tooltip"
+        role="tooltip"
+        aria-hidden="true"
+      ></div>
+    </div>
+
+    <div
+      class="detail-panel"
+      id="detail-panel"
+      aria-live="polite"
+      aria-label="Detaljinformation om vald sektor"
+    ></div>
+
+    <div
+      class="sr-only"
+      id="chart-summary"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
+    <div class="error-container" id="error-container" role="alert"></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="js/bubble-chart.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

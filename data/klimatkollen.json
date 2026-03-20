@@ -1,0 +1,46 @@
+{
+  "data": [
+    {
+      "year": 2015,
+      "co2e_kton_total": 680,
+      "trend": "baseline",
+      "source": "Klimatkollen"
+    },
+    {
+      "year": 2016,
+      "co2e_kton_total": 660,
+      "trend": "minskning",
+      "source": "Klimatkollen"
+    },
+    {
+      "year": 2017,
+      "co2e_kton_total": 650,
+      "trend": "minskning",
+      "source": "Klimatkollen"
+    },
+    {
+      "year": 2018,
+      "co2e_kton_total": 635,
+      "trend": "minskning",
+      "source": "Klimatkollen"
+    },
+    {
+      "year": 2019,
+      "co2e_kton_total": 620,
+      "trend": "minskning",
+      "source": "Klimatkollen"
+    },
+    {
+      "year": 2020,
+      "co2e_kton_total": 570,
+      "trend": "minskning",
+      "source": "Klimatkollen"
+    },
+    {
+      "year": 2021,
+      "co2e_kton_total": 590,
+      "trend": "ökning",
+      "source": "Klimatkollen"
+    }
+  ]
+}

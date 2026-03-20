@@ -1,0 +1,13 @@
+[
+  {
+    "source_id": "klimatkollen",
+    "source_name": "Klimatkollen — Kommunal utsläppstrend",
+    "url": "https://klimatkollen.se/",
+    "fetch_script": "scripts/fetch_klimatkollen.py",
+    "last_fetched": "2026-03-20",
+    "format": "web",
+    "license": "Öppen data",
+    "data_file": "data/klimatkollen.json",
+    "row_count": 7
+  }
+]
